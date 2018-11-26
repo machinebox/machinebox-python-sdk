@@ -7,6 +7,7 @@ tbd
 """
 from PIL import Image
 import requests
+import shutil
 
 BOUNDING_BOX = 'bounding_box'
 CLASSIFIER = 'classifier'
@@ -118,6 +119,7 @@ class Facebox():
         """Init with the API key and model id."""
         self._url_check = f"http://{ip_address}:{port}/{CLASSIFIER}/check"
         self._url_teach = f"http://{ip_address}:{port}/{CLASSIFIER}/teach"
+        self._url_state = f"http://{ip_address}:{port}/{CLASSIFIER}/state"
         self._username = username
         self._password = password
         self._print_info = print_info # Print messages
@@ -132,6 +134,15 @@ class Facebox():
         self._faces = []
         self._total_faces = None
         self._matched = {}
+
+    def get_state(self):
+        """Get the state file."""
+        response = requests.get(self._url_state, stream=True)
+        state_filename = 'state.facebox'
+        with open(state_filename, 'wb') as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+        if self._print_info:
+            print(f"Downloaded state file : {state_filename}")
 
     def process_file(self, file_path):
         """Process an file."""
