@@ -110,7 +110,7 @@ def valid_image_file(file_path):
         return False
 
 
-class FaceboxBox():
+class Facebox():
     """Encapsulate a Facebox Box."""
 
     def __init__(self, ip_address='localhost', port=8080, 
