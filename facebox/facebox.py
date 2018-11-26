@@ -5,7 +5,11 @@ Perform facial detection and identification via facebox.
 For more details about this code, please refer to the documentation at
 tbd
 """
+import base64
+import imghdr
 import requests
+
+from PIL import Image
 
 BOUNDING_BOX = 'bounding_box'
 CLASSIFIER = 'classifier'
@@ -38,6 +42,12 @@ def check_box_health(url, username, password):
         print(exc)
 
 
+def encode_image(image):
+    """base64 encode an image stream."""
+    base64_img = base64.b64encode(image).decode('ascii')
+    return base64_img
+
+
 def get_matched_faces(faces):
     """Return the name and rounded confidence of matched faces."""
     return {face['name']: round(face['confidence'], 2)
@@ -62,22 +72,32 @@ def parse_faces(api_faces):
     return known_faces
 
 
-def post_file(url, file_path, username, password):
+def post_image(url, file_path, username, password):
     """Post an image to the classifier."""
+    #with(Image.open(file_path) as image):
+    return
+
+
+
+def post_file(url, file_path, username, password):
+    """Post a file to the classifier."""
     kwargs = {}
     if username:
         kwargs['auth'] = requests.auth.HTTPBasicAuth(username, password)
     file = {'file': open(file_path, 'rb')}
 
-    response = requests.post(
-        url,
-        files=file,
-        **kwargs
-    )
+    try:
+        response = requests.post(
+            url,
+            files=file,
+            **kwargs
+        )
     
-    if response.status_code == HTTP_OK:
-        return response
-    return None
+        if response.status_code == HTTP_OK:
+            return response
+        return None
+    except Exception as error:
+        print(error)
 
 
 def teach_file(url, name, file_path, username, password):
@@ -97,6 +117,17 @@ def teach_file(url, name, file_path, username, password):
     if response.status_code == HTTP_OK:
         return response
     return None
+
+
+def valid_image_file(file_path):
+    """Check that a file_path points to a valid image file."""
+    try:
+        file_type = imghdr.what(file_path)
+        if file_type in ['jpeg', 'png']:
+            return True
+    except Exception as error:
+        print(error)
+    return False
 
 
 class FaceboxBox():
@@ -123,15 +154,20 @@ class FaceboxBox():
 
     def process_file(self, file_path):
         """Process an image."""
+        if not valid_image_file(file_path):
+            return
         response = post_file(
             self._url_check, file_path, self._username, self._password)
         if response:
-            response_json = response.json()
-            if response_json['success']:
-                self._faces = parse_faces(response_json['faces'])
-                self._total_faces = response_json['facesCount']
-                self._matched = get_matched_faces(self._faces)
+            self.process_response(response)
 
+    def process_response(self, response):
+        """Process the API response."""
+        response_json = response.json()
+        if response_json['success']:
+            self._faces = parse_faces(response_json['faces'])
+            self._total_faces = response_json['facesCount']
+            self._matched = get_matched_faces(self._faces)
         else:
             self._faces = []
             self._total_faces = None
@@ -139,8 +175,8 @@ class FaceboxBox():
 
     def teach(self, name, file_path):
         """Teach classifier a face name."""
-        #if not valid_file_path(file_path)):
-        #    return
+        if not valid_image_file(file_path):
+            return
         teach_file(
             self._url_teach, name, file_path, self._username, self._password)
 
