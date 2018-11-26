@@ -161,6 +161,8 @@ class Facebox():
             return
         teach_file(
             self._url_teach, name, file_path, self._username, self._password)
+        if self._print_info:
+            print(f"Taught face {name} with file {file_path}")
 
     @property
     def faces(self):
