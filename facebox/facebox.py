@@ -137,12 +137,36 @@ class Facebox():
 
     def get_state(self):
         """Get the state file."""
-        response = requests.get(self._url_state, stream=True)
+        kwargs = {}
+        if self._username:
+            kwargs['auth'] = requests.auth.HTTPBasicAuth(
+                self._username, self._password)
+
+        response = requests.get(self._url_state, stream=True, **kwargs)
+
         state_filename = 'state.facebox'
         with open(state_filename, 'wb') as out_file:
             shutil.copyfileobj(response.raw, out_file)
         if self._print_info:
             print(f"Downloaded state file : {state_filename}")
+
+    def post_state(self):
+        """Post the state file."""
+        state_filename = 'state.facebox'
+        file = {'file': open(state_filename, 'rb')}
+
+        kwargs = {}
+        if self._username:
+            kwargs['auth'] = requests.auth.HTTPBasicAuth(
+                self._username, self._password)
+
+        response = requests.post(
+            self._url_state,
+            files=file,
+            **kwargs
+        )
+        if response.status_code == HTTP_OK and self._print_info:
+            print(f"Posted state file : {state_filename}")
 
     def process_file(self, file_path):
         """Process an file."""
