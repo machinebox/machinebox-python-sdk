@@ -5,7 +5,11 @@ import pytest
 import requests
 import requests_mock
 
-from .context import facebox as fb
+from machinebox.core import check_box_health
+from machinebox.const import (
+    NAME, IMAGE_ID, CONFIDENCE, MATCHED, BOUNDING_BOX, 
+    HTTP_OK, HTTP_UNAUTHORIZED
+)
 
 MOCK_IP = '192.168.0.1'
 MOCK_PORT = '8080'
@@ -35,11 +39,11 @@ MOCK_USERNAME = 'mock_username'
 MOCK_PASSWORD = 'mock_password'
 
 # Faces data after parsing.
-PARSED_FACES = [{fb.NAME: 'John Lennon',
-                 fb.IMAGE_ID: 'john.jpg',
-                 fb.CONFIDENCE: 58.12,
-                 fb.MATCHED: True,
-                 fb.BOUNDING_BOX: {
+PARSED_FACES = [{NAME: 'John Lennon',
+                 IMAGE_ID: 'john.jpg',
+                 CONFIDENCE: 58.12,
+                 MATCHED: True,
+                 BOUNDING_BOX: {
                      'height': 75,
                      'left': 63,
                      'top': 262,
@@ -50,8 +54,8 @@ MATCHED_FACES = {'John Lennon': 58.12}
 
 @pytest.fixture
 def mock_healthybox():
-    """Mock fb.check_box_health."""
-    with patch('facebox.facebox.check_box_health', return_value=MOCK_BOX_ID) as _mock_healthybox:
+    """Mock check_box_health."""
+    with patch('machinebox.core.check_box_health', return_value=MOCK_BOX_ID) as _mock_healthybox:
         yield _mock_healthybox
 
 
@@ -59,9 +63,9 @@ def test_check_box_health(caplog):
     """Test check box health."""
     with requests_mock.Mocker() as mock_req:
         url = "http://{}:{}/healthz".format(MOCK_IP, MOCK_PORT)
-        mock_req.get(url, status_code=fb.HTTP_OK, json=MOCK_HEALTH)
-        assert fb.check_box_health(url, 'user', 'pass') == MOCK_BOX_ID
+        mock_req.get(url, status_code=HTTP_OK, json=MOCK_HEALTH)
+        assert check_box_health(url, 'user', 'pass') == MOCK_BOX_ID
 
-        mock_req.get(url, status_code=fb.HTTP_UNAUTHORIZED)
-        assert fb.check_box_health(url, None, None) is None
+        mock_req.get(url, status_code=HTTP_UNAUTHORIZED)
+        assert check_box_health(url, None, None) is None
 
