@@ -5,39 +5,19 @@ Perform facial detection and identification via facebox.
 For more details about this code, please refer to the documentation at
 tbd
 """
-from PIL import Image
 import requests
 import shutil
 
-BOUNDING_BOX = 'bounding_box'
-CLASSIFIER = 'classifier'
-CONFIDENCE = 'confidence'
-IMAGE_ID = 'image_id'
-ID = 'id'
-MATCHED = 'matched'
-CLASSIFIER = 'facebox'
-NAME = 'name'
-FILE_PATH = 'file_path'
-HTTP_BAD_REQUEST = 400
-HTTP_OK = 200
-HTTP_UNAUTHORIZED = 401
+from machinebox.core import (
+    check_box_health, post_file, teach_file, valid_image_file
+)
 
-def check_box_health(url, username, password):
-    """Check the health of the classifier and return its id if healthy."""
-    kwargs = {}
-    if username:
-        kwargs['auth'] = requests.auth.HTTPBasicAuth(username, password)
-    
-    try:
-        response = requests.get(
-            url,
-            **kwargs
-        )
-        if response.status_code == HTTP_OK:
-            return response.json()['hostname']
-        return None
-    except Exception as exc:
-        print(exc)
+from machinebox.const import (
+    BOUNDING_BOX, CONFIDENCE, IMAGE_ID, ID, MATCHED, NAME, FILE_PATH, 
+    HTTP_BAD_REQUEST, HTTP_OK, HTTP_UNAUTHORIZED
+)
+
+CLASSIFIER = 'facebox'
 
 
 def get_matched_faces(faces):
@@ -62,53 +42,6 @@ def parse_faces(api_faces):
         face[BOUNDING_BOX] = entry['rect']
         known_faces.append(face)
     return known_faces
-
-
-def post_file(url, file_path, username, password):
-    """Post an image file to the classifier."""
-    kwargs = {}
-    if username:
-        kwargs['auth'] = requests.auth.HTTPBasicAuth(username, password)
-    file = {'file': open(file_path, 'rb')}
-
-    response = requests.post(
-        url,
-        files=file,
-        **kwargs
-    )
-
-    if response.status_code == HTTP_OK:
-        return response
-    return None
-
-
-def teach_file(url, name, file_path, username, password):
-    """Teach the classifier a name associated with a file."""
-    kwargs = {}
-    if username:
-        kwargs['auth'] = requests.auth.HTTPBasicAuth(username, password)
-        
-    with open(file_path, 'rb') as open_file:
-        response = requests.post(
-            url,
-            data={'name': name, 'id': file_path},
-            files={'file': open_file},
-            **kwargs
-        )
-        
-    if response.status_code == HTTP_OK:
-        return response
-    return None
-
-
-def valid_image_file(file_path):
-    """Lazily check that a file_path points to a valid image file."""
-    try:
-        Image.open(file_path)
-        return True
-    except Exception as error:
-        print(error)
-        return False
 
 
 class Facebox():

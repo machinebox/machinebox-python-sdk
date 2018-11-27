@@ -1,17 +1,23 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
+PACKAGES = find_packages(exclude=['tests', 'tests.*'])
 VERSION = '0.1'
 
+REQUIRES = [
+    'requests',
+    'pillow'
+]
+
 setup(
-    name='machinebox-sdk-python',
+    name='machinebox-python-sdk',
     version=VERSION,
-    py_modules= ['facebox'],
-    url='https://github.com/machinebox/sdk-python',
-    keywords='facbox',
-    author='who_is_this_to_be',
+    url='https://github.com/machinebox/machinebox-python-sdk',
+    keywords='machinebox',
+    author='Robin Cole',
     author_email='get_official_email',
     description='Tools for working with Facebox',
-    install_requires=['requests'],
+    install_requires=REQUIRES,
+    packages=PACKAGES,
     license='Apache License, Version 2.0',
     python_requires=">=3.6",
     classifiers=[
