@@ -18,7 +18,6 @@ from machinebox.const import (
 )
 
 CLASSIFIER = 'classificationbox'
-TIMEOUT = 9
 
 
 def get_matched_classes(classes):
@@ -32,7 +31,7 @@ def get_models(url, username, password):
     if username:
         kwargs['auth'] = requests.auth.HTTPBasicAuth(username, password)
 
-    response = requests.get(url, timeout=TIMEOUT, **kwargs)
+    response = requests.get(url, **kwargs)
     response_json = response.json()
     if response_json['success']:
         return response_json['models']
@@ -58,6 +57,7 @@ class Classificationbox():
         self._url_check = f"http://{ip_address}:{port}/{CLASSIFIER}/check"
         self._url_models = f"http://{ip_address}:{port}/{CLASSIFIER}/models"
         self._url_state = f"http://{ip_address}:{port}/{CLASSIFIER}/state"
+        self._url_teach = f"http://{ip_address}:{port}/{CLASSIFIER}/teach"
         self._username = username
         self._password = password
         self._print_info = print_info # Print messages
