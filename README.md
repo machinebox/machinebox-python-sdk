@@ -1,10 +1,14 @@
 [![build status](http://img.shields.io/travis/machinebox/machinebox-python-sdk/master.svg?style=flat)](https://travis-ci.org/machinebox/machinebox-python-sdk)
 [![Coverage Status](https://coveralls.io/repos/github/machinebox/machinebox-python-sdk/badge.svg?branch=master)](https://coveralls.io/github/machinebox/machinebox-python-sdk?branch=master)
-
+[![PyPI Version](https://img.shields.io/pypi/v/machinebox-python-sdk.svg)](https://pypi.org/project/machinebox-python-sdk/)
 
 # sdk-python
 
 Experimental. Do not use in production.
+Installation:
+```
+pip3 install machinebox-python-sdk
+```
 
 ## Tests
 From the root directory run `pytest`
