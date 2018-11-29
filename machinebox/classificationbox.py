@@ -5,6 +5,7 @@ Perform classification via classificationbox.
 For more details about this code, please refer to the documentation at
 tbd
 """
+import json
 import requests
 import shutil
 
@@ -23,6 +24,25 @@ CLASSIFIER = 'classificationbox'
 def get_matched_classes(classes):
     """Return the id and score of matched classes."""
     return {class_[ID]: class_[CONFIDENCE] for class_ in classes}
+
+
+def create_model(url, model_name, model_classes, username, password):
+    """
+    Create a new model
+    
+    model_name : string, the model name.
+    model_classes : list of string, the classes the model will learn.
+    """
+    kwargs = {}
+    if username:
+        kwargs['auth'] = requests.auth.HTTPBasicAuth(username, password)
+
+    response = requests.post(
+        url,
+        data=json.dumps({"name": model_name, "classes": model_classes}),
+        **kwargs
+    )
+    return response
 
 
 def get_models(url, username, password):
@@ -65,11 +85,24 @@ class Classificationbox():
         url_health = f"http://{ip_address}:{port}/healthz"
         self._hostname = check_box_health(
             url_health, self._username, self._password)
+
+    def create_model(self, model_name, model_classes):
+        """Create a new model with a model name and a list of classes.
         
-        self._models = get_models(
+        model_name : string, the name of the model to create
+        model_classes : a list of string of two or more classes 
+        """
+        response = create_model(self._url_models, model_name, model_classes, 
+                     self._username, self._password)
+        if self._print_info:
+            if response.status_code == HTTP_OK:
+                print(f"Created model with name : {model_name}")
+            else:
+                print(f"API response code : {response.status_code}")
+                print(f"API response description : {response.content}")
+        
+    def get_models(self):
+        """Get the models."""
+        return get_models(
             self._url_models, self._username, self._password)
 
-    @property
-    def models(self):
-        """Return the models information."""
-        return self._models

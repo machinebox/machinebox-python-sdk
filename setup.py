@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 PACKAGES = find_packages(exclude=['tests', 'tests.*'])
-VERSION = '0.1'
+VERSION = '0.2'
 
 REQUIRES = [
     'requests',
